@@ -1,89 +1,15 @@
 import { motion } from "motion/react";
-import { Award, TrendingUp, Users, Star, Globe, Leaf } from "lucide-react";
+import { TrendingUp, Users, Star, Phone, Mail, MapPin, Navigation } from "lucide-react";
 
 export function Achievements() {
   const stats = [
-    { number: "15+", label: "Лет на рынке", icon: TrendingUp },
+    { number: "20+", label: "Лет на рынке", icon: TrendingUp },
     { number: "10,000+", label: "Довольных клиентов", icon: Users },
-    { number: "50+", label: "Наград и премий", icon: Award },
     { number: "95%", label: "Положительных отзывов", icon: Star }
   ];
 
-  const awards = [
-    {
-      year: "2025",
-      title: "Best Furniture Design Award",
-      organization: "Milan Design Week",
-      description: "Гран-при за инновационный подход к дизайну мебели"
-    },
-    {
-      year: "2024",
-      title: "Eco-Friendly Production",
-      organization: "Green Business Awards",
-      description: "Награда за переход на экологичное производство"
-    },
-    {
-      year: "2023",
-      title: "Customer Choice Award",
-      organization: "Interior Design Magazine",
-      description: "Выбор покупателей в категории премиальная мебель"
-    },
-    {
-      year: "2022",
-      title: "Innovation in Manufacturing",
-      organization: "Industry Tech Summit",
-      description: "За внедрение современных технологий производства"
-    },
-    {
-      year: "2021",
-      title: "Best Furniture Brand",
-      organization: "Design Excellence Awards",
-      description: "Лучший бренд года в категории мебель для дома"
-    },
-    {
-      year: "2020",
-      title: "Quality & Craftsmanship",
-      organization: "Master Artisans Guild",
-      description: "За высочайшее качество исполнения и мастерство"
-    }
-  ];
-
-  const certifications = [
-    {
-      icon: Leaf,
-      title: "FSC Сертификация",
-      description: "Использование древесины из ответственных источников"
-    },
-    {
-      icon: Globe,
-      title: "ISO 9001",
-      description: "Международный стандарт системы менеджмента качества"
-    },
-    {
-      icon: Star,
-      title: "European Quality",
-      description: "Соответствие европейским стандартам качества"
-    }
-  ];
-
-  const achievements = [
-    {
-      title: "Первый завод в России",
-      description: "Запустили первое полностью автоматизированное производство мебели премиум-класса"
-    },
-    {
-      title: "Экспорт в 15 стран",
-      description: "Наша мебель украшает дома по всему миру — от Европы до Азии"
-    },
-    {
-      title: "Собственная лаборатория",
-      description: "Разработка инновационных материалов и технологий производства"
-    },
-    {
-      title: "Zero Waste к 2028",
-      description: "Стремимся к полному отказу от отходов в производстве"
-    }
-  ];
+  const lat = 43.063086;
+  const lng = 58.852289;
 
   return (
     <div style={{ backgroundColor: '#FAE7C9' }}>
@@ -110,16 +36,17 @@ export function Achievements() {
               margin: '0 auto',
               lineHeight: '1.7'
             }}>
-              15 лет упорного труда, инноваций и стремления к совершенству.
+              22 лет упорного труда, инноваций и стремления к совершенству.
               Каждая награда — это признание нашей работы и доверие наших клиентов.
             </p>
           </motion.div>
         </div>
       </section>
 
+      {/* Статистика */}
       <section className="py-24 px-6" style={{ backgroundColor: '#FAE7C9' }}>
         <div className="container mx-auto max-w-7xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {stats.map((stat, index) => (
               <motion.div
                 key={index}
@@ -154,175 +81,131 @@ export function Achievements() {
         </div>
       </section>
 
-      <section className="py-24 px-6" style={{ backgroundColor: '#B0926A' }}>
+      {/* Контакты и карта */}
+      <section className="py-24 px-6" style={{ backgroundColor: '#706233' }}>
         <div className="container mx-auto max-w-7xl">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
             className="text-center mb-16"
-            style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              fontWeight: '700',
-              color: '#FAE7C9'
-            }}
           >
-            Награды и признание
-          </motion.h2>
+            <h2 style={{
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
+              fontWeight: '700',
+              color: '#FAE7C9',
+              marginBottom: '1rem'
+            }}>
+              Связаться с нами
+            </h2>
+            <p style={{
+              fontSize: '1.1rem',
+              color: '#E1C78F',
+              maxWidth: '600px',
+              margin: '0 auto'
+            }}>
+              Мы всегда рады ответить на ваши вопросы и помочь с выбором
+            </p>
+          </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {awards.map((award, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ scale: 1.03 }}
-                className="p-8 rounded-3xl"
-                style={{ backgroundColor: '#FAE7C9' }}
-              >
-                <div className="flex items-start gap-4 mb-4">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: '#706233' }}
-                  >
-                    <Award size={24} color="#FAE7C9" />
-                  </div>
-                  <div
-                    className="px-3 py-1 rounded-full"
-                    style={{ backgroundColor: '#E1C78F', color: '#706233', fontSize: '0.9rem', fontWeight: '600' }}
-                  >
-                    {award.year}
-                  </div>
+          <div className="grid md:grid-cols-2 gap-12 items-start">
+            {/* Контактная информация */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="space-y-8"
+            >
+              <div className="flex items-start gap-4 p-6 rounded-2xl" style={{ backgroundColor: '#E1C78F' }}>
+                <div className="p-3 rounded-xl" style={{ backgroundColor: '#706233' }}>
+                  <Phone size={24} color="#FAE7C9" />
                 </div>
-                <h3 style={{
-                  fontSize: '1.4rem',
-                  fontWeight: '600',
-                  color: '#706233',
-                  marginBottom: '0.5rem'
-                }}>
-                  {award.title}
-                </h3>
-                <p style={{
-                  color: '#B0926A',
-                  fontSize: '0.95rem',
-                  marginBottom: '0.75rem',
-                  fontWeight: '500'
-                }}>
-                  {award.organization}
-                </p>
-                <p style={{ color: '#706233', fontSize: '1rem', opacity: 0.8, lineHeight: '1.6' }}>
-                  {award.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 px-6" style={{ backgroundColor: '#E1C78F' }}>
-        <div className="container mx-auto max-w-7xl">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-            style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              fontWeight: '700',
-              color: '#706233'
-            }}
-          >
-            Сертификаты качества
-          </motion.h2>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {certifications.map((cert, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="text-center p-8 rounded-3xl"
-                style={{ backgroundColor: '#FAE7C9' }}
-              >
-                <div
-                  className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                  style={{ backgroundColor: '#706233' }}
-                >
-                  <cert.icon size={36} color="#FAE7C9" />
+                <div>
+                  <h3 style={{ color: '#706233', fontWeight: '600', marginBottom: '0.25rem' }}>Телефон</h3>
+                  <a href="tel:+998912674773" style={{ color: '#706233', opacity: 0.8, textDecoration: 'none' }}>
+                     +998 91 267 47 73
+                  </a>
                 </div>
-                <h3 style={{
-                  fontSize: '1.4rem',
-                  fontWeight: '600',
-                  color: '#706233',
-                  marginBottom: '0.75rem'
-                }}>
-                  {cert.title}
-                </h3>
-                <p style={{ color: '#706233', opacity: 0.8, lineHeight: '1.6' }}>
-                  {cert.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+              </div>
 
-      <section className="py-24 px-6" style={{ backgroundColor: '#FAE7C9' }}>
-        <div className="container mx-auto max-w-7xl">
-          <motion.h2
+              <div className="flex items-start gap-4 p-6 rounded-2xl" style={{ backgroundColor: '#E1C78F' }}>
+                <div className="p-3 rounded-xl" style={{ backgroundColor: '#706233' }}>
+                  <Mail size={24} color="#FAE7C9" />
+                </div>
+                <div>
+                  <h3 style={{ color: '#706233', fontWeight: '600', marginBottom: '0.25rem' }}>Email</h3>
+                  <a href="mailto:samandarurinbaev1@gmail.com" style={{ color: '#706233', opacity: 0.8, textDecoration: 'none' }}>
+                    "samandarurinbaev1@gmail.com"
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 p-6 rounded-2xl" style={{ backgroundColor: '#E1C78F' }}>
+                <div className="p-3 rounded-xl" style={{ backgroundColor: '#706233' }}>
+                  <MapPin size={24} color="#FAE7C9" />
+                </div>
+                <div>
+                  <h3 style={{ color: '#706233', fontWeight: '600', marginBottom: '0.25rem' }}>Адрес</h3>
+                  <p style={{ color: '#706233', opacity: 0.8 }}>
+                    43°03'47.1"N 58°51'08.2"E
+                  </p>
+                  <p style={{ color: '#706233', opacity: 0.7, fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                    Республика Каракалпакстан, г. Кунград
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Карта с маркером */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="rounded-3xl overflow-hidden shadow-xl"
+            >
+              <div className="relative pb-[56.25%] h-0">
+                <iframe
+                  src={`https://www.google.com/maps?q=${lat},${lng}&z=16&output=embed`}
+                  className="absolute top-0 left-0 w-full h-full border-0"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Карта с расположением офиса"
+                ></iframe>
+              </div>
+              <div className="p-4 text-center" style={{ backgroundColor: '#E1C78F' }}>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: '#ef4444' }}></div>
+                  <p style={{ color: '#706233', fontWeight: '500', fontSize: '0.9rem' }}>
+                    📍 Мы находимся здесь (красная метка)
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Кнопка открыть карту */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
-            style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              fontWeight: '700',
-              color: '#706233'
-            }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="text-center mt-12"
           >
-            Ключевые вехи
-          </motion.h2>
-
-          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            {achievements.map((achievement, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                className="p-8 rounded-3xl"
-                style={{ backgroundColor: '#E1C78F' }}
-              >
-                <div
-                  className="w-3 h-3 rounded-full mb-4"
-                  style={{ backgroundColor: '#706233' }}
-                />
-                <h3 style={{
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  color: '#706233',
-                  marginBottom: '0.75rem'
-                }}>
-                  {achievement.title}
-                </h3>
-                <p style={{
-                  color: '#706233',
-                  opacity: 0.8,
-                  fontSize: '1.05rem',
-                  lineHeight: '1.6'
-                }}>
-                  {achievement.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
+            <a
+              href={`https://www.google.com/maps/place/${lat},${lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105"
+              style={{ backgroundColor: '#E1C78F', color: '#706233' }}
+            >
+              <Navigation size={20} />
+              Построить маршрут
+            </a>
+          </motion.div>
         </div>
       </section>
     </div>

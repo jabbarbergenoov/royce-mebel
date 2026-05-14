@@ -11,7 +11,7 @@ export function About() {
     {
       icon: Users,
       title: "Опыт",
-      description: "Более 15 лет создаём мебель мечты для тысяч семей"
+      description: "Более 20 лет создаём мебель мечты для тысяч семей"
     },
     {
       icon: Sparkles,

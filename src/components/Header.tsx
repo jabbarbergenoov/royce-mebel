@@ -10,7 +10,7 @@ export function Header() {
   const menuItems = [
     { label: "Главная", path: "/" },
     { label: "О нас", path: "/about" },
-    { label: "Достижения", path: "/achievements" }
+    { label: "Достижений и Связаться", path: "/achievements" }
   ];
 
   return (
