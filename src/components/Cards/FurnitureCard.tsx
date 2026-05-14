@@ -1,3 +1,4 @@
+// FurnitureCard.tsx
 import { motion } from "motion/react";
 import { ImageWithFallback } from "./ImageWithFalback";
 
@@ -6,10 +7,33 @@ interface FurnitureCardProps {
   category: string;
   price: string;
   imageUrl: string;
+  description?: string;
+  addition?: string;
   delay?: number;
+  onOpenDrawer: (product: {
+    title: string;
+    category: string;
+    price: string;
+    imageUrl: string;
+    description?: string;
+    addition?: string;
+  }) => void;
 }
 
-export function FurnitureCard({ title, category, price, imageUrl, delay = 0 }: FurnitureCardProps) {
+export function FurnitureCard({ 
+  title, 
+  category, 
+  price, 
+  imageUrl, 
+  description, 
+  addition, 
+  delay = 0,
+  onOpenDrawer 
+}: FurnitureCardProps) {
+  const handleOpenDrawer = () => {
+    onOpenDrawer({ title, category, price, imageUrl, description, addition });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -18,6 +42,7 @@ export function FurnitureCard({ title, category, price, imageUrl, delay = 0 }: F
       transition={{ duration: 0.6, delay }}
       whileHover={{ y: -10 }}
       className="group cursor-pointer"
+      onClick={handleOpenDrawer}
     >
       <motion.div
         className="rounded-2xl overflow-hidden mb-4 relative"
@@ -35,8 +60,13 @@ export function FurnitureCard({ title, category, price, imageUrl, delay = 0 }: F
         <motion.div
           className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{ backgroundColor: 'rgba(112, 98, 51, 0.85)' }}
+          onClick={(e) => e.stopPropagation()}
         >
           <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenDrawer();
+            }}
             className="px-8 py-3 rounded-full"
             style={{ backgroundColor: '#FAE7C9', color: '#706233' }}
           >
