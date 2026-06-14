@@ -1,22 +1,19 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router'
+import { Outlet, createRootRoute } from "@tanstack/react-router";
 
-import '../styles.css'
-import { Header } from '#/components/Header'
-import { Footer } from '#/components/Footer'
+import "../styles.css";
+import { Header } from "#/components/Header";
 
 export const Route = createRootRoute({
   component: RootComponent,
-})
+});
 
 function RootComponent() {
   return (
     <>
       <Header />
-      <main className=''>
+      <main className="">
         <Outlet />
-
       </main>
-      <Footer />
     </>
-  )
+  );
 }
