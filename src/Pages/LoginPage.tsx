@@ -1,7 +1,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertCircle, CheckCircle, X } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  ArrowRight,
+  AlertCircle,
+  CheckCircle,
+  X,
+} from "lucide-react";
 import axios from "axios";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,7 +22,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
-
+  const navigate = useNavigate();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -37,28 +47,31 @@ export default function LoginPage() {
     }
 
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, payload);
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/login`,
+        payload,
+      );
 
       console.log("Успешный вход:", data);
       localStorage.setItem("accessToken", data.access_token);
       localStorage.setItem("refreshToken", data.refres_token);
-      
+      localStorage.setItem("role" , data.role)
+
       setShowSuccess(true);
       setTimeout(() => {
-        // Перенаправление после успешного входа
-        // window.location.href = "/dashboard";
+        navigate({ to: "/admin" });
       }, 1500);
-      
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Неверный логин или пароль";
+      const errorMessage =
+        error.response?.data?.message || "Неверный логин или пароль";
       setError(errorMessage);
-      
+
       // Анимация встряхивания формы при ошибке
-      const formElement = document.querySelector('form');
+      const formElement = document.querySelector("form");
       if (formElement) {
-        formElement.style.animation = 'shake 0.5s ease-in-out';
+        formElement.style.animation = "shake 0.5s ease-in-out";
         setTimeout(() => {
-          if (formElement) formElement.style.animation = '';
+          if (formElement) formElement.style.animation = "";
         }, 500);
       }
     } finally {
@@ -67,13 +80,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ backgroundColor: "#FAE7C9" }} className="min-h-screen relative">
+    <div
+      style={{ backgroundColor: "#FAE7C9" }}
+      className="min-h-screen relative"
+    >
       {/* Анимация встряхивания */}
-      <style jsx>{`
+      <style
+        //@ts-ignore
+        jsx
+      >{`
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-          20%, 40%, 60%, 80% { transform: translateX(5px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          10%,
+          30%,
+          50%,
+          70%,
+          90% {
+            transform: translateX(-5px);
+          }
+          20%,
+          40%,
+          60%,
+          80% {
+            transform: translateX(5px);
+          }
         }
       `}</style>
 
@@ -86,7 +119,10 @@ export default function LoginPage() {
             exit={{ opacity: 0, y: -50 }}
             className="fixed top-5 left-1/2 -translate-x-1/2 z-50"
           >
-            <div className="flex items-center gap-3 px-6 py-3 rounded-full shadow-lg" style={{ backgroundColor: "#4caf50", color: "white" }}>
+            <div
+              className="flex items-center gap-3 px-6 py-3 rounded-full shadow-lg"
+              style={{ backgroundColor: "#4caf50", color: "white" }}
+            >
               <CheckCircle size={20} />
               <span>Успешный вход! Перенаправление...</span>
               <button onClick={() => setShowSuccess(false)} className="ml-2">
@@ -98,12 +134,21 @@ export default function LoginPage() {
       </AnimatePresence>
 
       {/* Hero секция с градиентом */}
-      <section className="relative overflow-hidden py-20 px-6" style={{ backgroundColor: "#E1C78F" }}>
+      <section
+        className="relative overflow-hidden py-20 px-6"
+        style={{ backgroundColor: "#E1C78F" }}
+      >
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-64 h-64 rounded-full" style={{ backgroundColor: "#706233" }} />
-          <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full" style={{ backgroundColor: "#706233" }} />
+          <div
+            className="absolute top-0 left-0 w-64 h-64 rounded-full"
+            style={{ backgroundColor: "#706233" }}
+          />
+          <div
+            className="absolute bottom-0 right-0 w-96 h-96 rounded-full"
+            style={{ backgroundColor: "#706233" }}
+          />
         </div>
-        
+
         <div className="container mx-auto max-w-7xl relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -117,11 +162,14 @@ export default function LoginPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="inline-block mb-6"
             >
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto" style={{ backgroundColor: "#706233" }}>
+              <div
+                className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto"
+                style={{ backgroundColor: "#706233" }}
+              >
                 <Lock size={36} color="#FAE7C9" />
               </div>
             </motion.div>
-            
+
             <h1
               style={{
                 fontSize: "clamp(2.5rem, 6vw, 4rem)",
@@ -182,7 +230,10 @@ export default function LoginPage() {
                     style={{
                       backgroundColor: "#FAE7C9",
                       color: "#706233",
-                      border: error && !formData.login ? "2px solid #c62828" : "2px solid transparent",
+                      border:
+                        error && !formData.login
+                          ? "2px solid #c62828"
+                          : "2px solid transparent",
                     }}
                     onFocus={(e) => {
                       e.target.style.borderColor = "#B0926A";
@@ -219,7 +270,10 @@ export default function LoginPage() {
                     style={{
                       backgroundColor: "#FAE7C9",
                       color: "#706233",
-                      border: error && !formData.password ? "2px solid #c62828" : "2px solid transparent",
+                      border:
+                        error && !formData.password
+                          ? "2px solid #c62828"
+                          : "2px solid transparent",
                     }}
                     onFocus={(e) => {
                       e.target.style.borderColor = "#B0926A";
@@ -242,8 +296,6 @@ export default function LoginPage() {
                 </div>
               </div>
 
-             
-
               {/* Ошибка с иконкой */}
               <AnimatePresence>
                 {error && (
@@ -252,7 +304,10 @@ export default function LoginPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     className="mb-6 p-3 rounded-xl flex items-center gap-2"
-                    style={{ backgroundColor: "#ffebee", border: "1px solid #ef9a9a" }}
+                    style={{
+                      backgroundColor: "#ffebee",
+                      border: "1px solid #ef9a9a",
+                    }}
                   >
                     <AlertCircle size={18} style={{ color: "#c62828" }} />
                     <p className="text-sm" style={{ color: "#c62828" }}>
@@ -284,14 +339,15 @@ export default function LoginPage() {
                   ) : (
                     <>
                       Войти
-                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight
+                        size={18}
+                        className="group-hover:translate-x-1 transition-transform"
+                      />
                     </>
                   )}
                 </span>
               </motion.button>
             </form>
-
-          
           </motion.div>
 
           {/* Декоративные элементы */}
@@ -302,9 +358,18 @@ export default function LoginPage() {
             className="mt-12 text-center"
           >
             <div className="flex justify-center gap-4">
-              <div className="w-12 h-1 rounded-full" style={{ backgroundColor: "#E1C78F" }} />
-              <div className="w-12 h-1 rounded-full" style={{ backgroundColor: "#B0926A" }} />
-              <div className="w-12 h-1 rounded-full" style={{ backgroundColor: "#E1C78F" }} />
+              <div
+                className="w-12 h-1 rounded-full"
+                style={{ backgroundColor: "#E1C78F" }}
+              />
+              <div
+                className="w-12 h-1 rounded-full"
+                style={{ backgroundColor: "#B0926A" }}
+              />
+              <div
+                className="w-12 h-1 rounded-full"
+                style={{ backgroundColor: "#E1C78F" }}
+              />
             </div>
           </motion.div>
         </div>
