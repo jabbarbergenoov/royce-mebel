@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AchievementsRouteImport } from './routes/achievements'
@@ -25,6 +26,11 @@ const ProductsRoute = ProductsRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogRoute = CatalogRouteImport.update({
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
   '/catalog': typeof CatalogRoute
+  '/documents': typeof DocumentsRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
   '/catalog': typeof CatalogRoute
+  '/documents': typeof DocumentsRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
   '/catalog': typeof CatalogRoute
+  '/documents': typeof DocumentsRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/admin'
     | '/catalog'
+    | '/documents'
     | '/login'
     | '/products'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/admin'
     | '/catalog'
+    | '/documents'
     | '/login'
     | '/products'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/admin'
     | '/catalog'
+    | '/documents'
     | '/login'
     | '/products'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   AchievementsRoute: typeof AchievementsRoute
   AdminRoute: typeof AdminRoute
   CatalogRoute: typeof CatalogRoute
+  DocumentsRoute: typeof DocumentsRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
 }
@@ -135,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catalog': {
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   AchievementsRoute: AchievementsRoute,
   AdminRoute: AdminRoute,
   CatalogRoute: CatalogRoute,
+  DocumentsRoute: DocumentsRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
 }

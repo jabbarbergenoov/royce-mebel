@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Menu, User, LogOut, ShoppingBag, Package, Heart } from "lucide-react";
+import { Menu, User, LogOut, ShoppingBag, Package, Heart, File } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 
@@ -35,7 +35,7 @@ export function Header() {
   const authMenuItems = [
     { label: "Каталог", path: "/catalog", icon: ShoppingBag },
     { label: "Товары", path: "/products", icon: Package },
-    { label: "Избранное", path: "/favorites", icon: Heart }
+    { label: "Документы", path: "/documents", icon: File }
   ];
 
   const getMenuItems = () => {
