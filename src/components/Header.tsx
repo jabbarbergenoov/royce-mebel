@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Menu, User, LogOut, ShoppingBag, Package, Heart } from "lucide-react";
+import { Menu, User, LogOut, ShoppingBag, Package, Heart, File, ShoppingBasket } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 
@@ -8,21 +8,40 @@ export function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const accessToken = localStorage.getItem("accessToken");
-      setIsAuthenticated(!!accessToken);
-    };
+  const checkAuth = () => {
+    const accessToken = localStorage.getItem("accessToken");
+    setIsAuthenticated(!!accessToken);
+  };
 
+  useEffect(() => {
     checkAuth();
+
+    // Слушаем изменения в localStorage (для других вкладок)
     window.addEventListener("storage", checkAuth);
-    return () => window.removeEventListener("storage", checkAuth);
+
+    // Слушаем кастомное событие для обновления в том же окне
+    window.addEventListener("authChange", checkAuth);
+
+    return () => {
+      window.removeEventListener("storage", checkAuth);
+      window.removeEventListener("authChange", checkAuth);
+    };
   }, []);
+
+  // Обновляем состояние при изменении маршрута (если нужно)
+  useEffect(() => {
+    checkAuth();
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("role");
     setIsAuthenticated(false);
+    
+    // Диспатчим событие для обновления других компонентов
+    window.dispatchEvent(new Event("authChange"));
+    
     window.location.href = "/";
   };
 
@@ -35,7 +54,8 @@ export function Header() {
   const authMenuItems = [
     { label: "Каталог", path: "/catalog", icon: ShoppingBag },
     { label: "Товары", path: "/products", icon: Package },
-    { label: "Избранное", path: "/favorites", icon: Heart }
+    { label: "Документы", path: "/documents", icon: File },
+    { label: "Заказы", path: "/orders", icon: ShoppingBasket }
   ];
 
   const getMenuItems = () => {
@@ -83,7 +103,6 @@ export function Header() {
             Войти
           </motion.button>
         </Link>
-     
       </div>
     );
   };

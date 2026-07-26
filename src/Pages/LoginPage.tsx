@@ -55,18 +55,20 @@ export default function LoginPage() {
       console.log("Успешный вход:", data);
       localStorage.setItem("accessToken", data.access_token);
       localStorage.setItem("refreshToken", data.refres_token);
-      localStorage.setItem("role" , data.role)
+      localStorage.setItem("role", data.role);
+
+      // ДИСПАТЧИМ СОБЫТИЕ ДЛЯ ОБНОВЛЕНИЯ HEADER
+      window.dispatchEvent(new Event("authChange"));
 
       setShowSuccess(true);
       setTimeout(() => {
-        navigate({ to: "/admin" });
+        navigate({ to: "/catalog" });
       }, 1500);
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || "Неверный логин или пароль";
       setError(errorMessage);
 
-      // Анимация встряхивания формы при ошибке
       const formElement = document.querySelector("form");
       if (formElement) {
         formElement.style.animation = "shake 0.5s ease-in-out";
