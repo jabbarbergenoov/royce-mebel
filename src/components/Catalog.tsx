@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { FurnitureCard } from "./Cards/FurnitureCard";
 import { Drawer } from "./Drawer";
-import { axiosInstance } from "#/lib/api";
+import axios from "axios";
 
 interface Product {
   id: number;
@@ -23,12 +23,13 @@ export function Catalog() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  
-  // Пагинация
+
   const [limit] = useState(12);
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const baseURL = import.meta.env.VITE_API_URL;
 
   // Загрузка товаров
   const fetchProducts = async (isLoadMore = false) => {
@@ -37,17 +38,17 @@ export function Catalog() {
     } else {
       setIsLoading(true);
     }
-    
+
     try {
-      const { data } = await axiosInstance.get("/products", {
+      const { data } = await axios.get(`${baseURL}/products`, {
         params: {
           limit,
-          offset: isLoadMore ? offset : 0
-        }
+          offset: isLoadMore ? offset : 0,
+        },
       });
-      
+
       if (isLoadMore) {
-        setProducts(prev => [...prev, ...(data.products || [])]);
+        setProducts((prev) => [...prev, ...(data.products || [])]);
       } else {
         setProducts(data.products || []);
       }
@@ -71,7 +72,6 @@ export function Catalog() {
     fetchProducts(true);
   };
 
-  // Открыть Drawer с деталями товара
   const handleOpenDrawer = (product: Product) => {
     setSelectedProduct(product);
     setIsDrawerOpen(true);
@@ -82,11 +82,10 @@ export function Catalog() {
     setSelectedProduct(null);
   };
 
-  // Полный URL изображения
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "/placeholder.jpg";
     if (imagePath.startsWith("http")) return imagePath;
-    const baseURL = import.meta.env.VITE_API_URL;
+
     return `${baseURL}${imagePath}`;
   };
 
@@ -94,7 +93,7 @@ export function Catalog() {
 
   return (
     <>
-      <section className="py-24 px-6" style={{ backgroundColor: '#FAE7C9' }}>
+      <section className="py-24 px-6" style={{ backgroundColor: "#FAE7C9" }}>
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -103,15 +102,17 @@ export function Catalog() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              fontWeight: '700',
-              color: '#706233',
-              marginBottom: '1rem'
-            }}>
+            <h2
+              style={{
+                fontSize: "clamp(2.5rem, 5vw, 4rem)",
+                fontWeight: "700",
+                color: "#706233",
+                marginBottom: "1rem",
+              }}
+            >
               Наша коллекция
             </h2>
-            <p style={{ color: '#B0926A', fontSize: '1.2rem' }}>
+            <p style={{ color: "#B0926A", fontSize: "1.2rem" }}>
               Эксклюзивные решения для вашего дома
             </p>
           </motion.div>
@@ -125,11 +126,23 @@ export function Catalog() {
                   className="rounded-2xl overflow-hidden animate-pulse"
                   style={{ backgroundColor: "#E1C78F" }}
                 >
-                  <div className="h-56" style={{ backgroundColor: "#B0926A" }} />
+                  <div
+                    className="h-56"
+                    style={{ backgroundColor: "#B0926A" }}
+                  />
                   <div className="p-5 space-y-3">
-                    <div className="h-6 rounded w-3/4" style={{ backgroundColor: "#B0926A" }} />
-                    <div className="h-4 rounded w-1/2" style={{ backgroundColor: "#B0926A" }} />
-                    <div className="h-5 rounded w-1/4" style={{ backgroundColor: "#B0926A" }} />
+                    <div
+                      className="h-6 rounded w-3/4"
+                      style={{ backgroundColor: "#B0926A" }}
+                    />
+                    <div
+                      className="h-4 rounded w-1/2"
+                      style={{ backgroundColor: "#B0926A" }}
+                    />
+                    <div
+                      className="h-5 rounded w-1/4"
+                      style={{ backgroundColor: "#B0926A" }}
+                    />
                   </div>
                 </div>
               ))}
@@ -182,7 +195,7 @@ export function Catalog() {
                       backgroundColor: "#706233",
                       color: "#FAE7C9",
                       opacity: isLoadingMore ? 0.7 : 1,
-                      cursor: isLoadingMore ? "not-allowed" : "pointer"
+                      cursor: isLoadingMore ? "not-allowed" : "pointer",
                     }}
                   >
                     {isLoadingMore ? (
@@ -205,18 +218,22 @@ export function Catalog() {
       <Drawer
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
-        product={selectedProduct ? {
-          title: selectedProduct.name,
-          category: selectedProduct.catalog?.name || "Без категории",
-          //@ts-ignore
-          price: `${selectedProduct.price || "Цена не указана"}`,
-          imageUrl: getImageUrl(selectedProduct.image_name),
-          description: selectedProduct.description,
-          //@ts-ignore
-          addition: selectedProduct.addition,
-          //@ts-ignore
-          id: selectedProduct.id
-        } : null}
+        product={
+          selectedProduct
+            ? {
+                title: selectedProduct.name,
+                category: selectedProduct.catalog?.name || "Без категории",
+                //@ts-ignore
+                price: `${selectedProduct.price || "Цена не указана"}`,
+                imageUrl: getImageUrl(selectedProduct.image_name),
+                description: selectedProduct.description,
+                //@ts-ignore
+                addition: selectedProduct.addition,
+                //@ts-ignore
+                id: selectedProduct.id,
+              }
+            : null
+        }
       />
     </>
   );

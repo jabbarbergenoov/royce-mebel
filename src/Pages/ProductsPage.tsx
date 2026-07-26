@@ -13,6 +13,7 @@ interface Product {
   description: string;
   image_name: string;
   catalog_id: number;
+  price?: number;
   catalog?: {
     id: number;
     name: string;
@@ -31,6 +32,7 @@ interface FormData {
   description: string;
   image_name: string;
   catalog_id: string;
+  price: string;
 }
 
 export default function Products() {
@@ -45,7 +47,8 @@ export default function Products() {
     name: "",
     description: "",
     image_name: "",
-    catalog_id: ""
+    catalog_id: "",
+    price: ""
   });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -127,7 +130,6 @@ export default function Products() {
         },
       });
       
-      // response.data.url - это путь к файлу, например "/files/xxx.jpg"
       const imageUrl = response.data.url;
       setFormData(prev => ({ ...prev, image_name: imageUrl }));
       
@@ -144,12 +146,10 @@ export default function Products() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Проверка типа файла
       if (!file.type.startsWith("image/")) {
         alert("Пожалуйста, выберите изображение");
         return;
       }
-      // Проверка размера (максимум 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert("Размер изображения не должен превышать 5MB");
         return;
@@ -160,8 +160,8 @@ export default function Products() {
 
   // Создание товара
   const handleCreate = async () => {
-    if (!formData.name.trim() || !formData.catalog_id) {
-      alert("Заполните обязательные поля (название и категория)");
+    if (!formData.name.trim() || !formData.catalog_id || !formData.price) {
+      alert("Заполните обязательные поля (название, категория и цена)");
       return;
     }
     
@@ -170,7 +170,8 @@ export default function Products() {
         name: formData.name,
         description: formData.description,
         image_name: formData.image_name,
-        catalog_id: Number(formData.catalog_id)
+        catalog_id: Number(formData.catalog_id),
+        price: Number(formData.price)
       });
       await fetchProducts();
       closeModal();
@@ -183,8 +184,8 @@ export default function Products() {
 
   // Обновление товара
   const handleUpdate = async () => {
-    if (!formData.name.trim() || !formData.catalog_id) {
-      alert("Заполните обязательные поля (название и категория)");
+    if (!formData.name.trim() || !formData.catalog_id || !formData.price) {
+      alert("Заполните обязательные поля (название, категория и цена)");
       return;
     }
     
@@ -193,7 +194,8 @@ export default function Products() {
         name: formData.name,
         description: formData.description,
         image_name: formData.image_name,
-        catalog_id: Number(formData.catalog_id)
+        catalog_id: Number(formData.catalog_id),
+        price: Number(formData.price)
       });
       await fetchProducts();
       closeModal();
@@ -225,7 +227,8 @@ export default function Products() {
         name: product.name,
         description: product.description || "",
         image_name: product.image_name || "",
-        catalog_id: product.catalog_id.toString()
+        catalog_id: product.catalog_id.toString(),
+        price: product.price?.toString() || ""
       });
     } else {
       setEditingProduct(null);
@@ -233,7 +236,8 @@ export default function Products() {
         name: "",
         description: "",
         image_name: "",
-        catalog_id: ""
+        catalog_id: "",
+        price: ""
       });
     }
     setIsModalOpen(true);
@@ -251,7 +255,8 @@ export default function Products() {
       name: "",
       description: "",
       image_name: "",
-      catalog_id: ""
+      catalog_id: "",
+      price: ""
     });
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -266,7 +271,6 @@ export default function Products() {
     return catalog ? catalog.name : "Без категории";
   };
 
-  // Полный URL изображения
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return null;
     const baseURL = import.meta.env.VITE_API_URL;
@@ -400,14 +404,24 @@ export default function Products() {
                     <h3 style={{ color: "#706233", fontSize: "1.2rem", fontWeight: "600" }} className="mb-2">
                       {product.name}
                     </h3>
+                    
+                    {/* Отображение цены */}
+                    <div className="mb-2">
+                      <span className="font-semibold text-lg" style={{ color: "#706233" }}>
+                        {product.price ? `${Number(product.price).toFixed(2)} ₽` : "Цена не указана"}
+                      </span>
+                    </div>
+                    
                     <p style={{ color: "#706233", opacity: 0.7, fontSize: "0.9rem" }} className="mb-2 line-clamp-2">
                       {product.description || "Нет описания"}
                     </p>
+                    
                     <div className="mb-3">
                       <span className="inline-block px-2 py-1 rounded-lg text-xs" style={{ backgroundColor: "#FAE7C9", color: "#706233" }}>
                         {product.catalog?.name || getCatalogName(product.catalog_id)}
                       </span>
                     </div>
+                    
                     <p style={{ color: "#706233", opacity: 0.5, fontSize: "0.7rem" }} className="mb-4">
                       ID: {product.id} | Создан: {new Date(product.created_at).toLocaleDateString()}
                     </p>
@@ -568,6 +582,28 @@ export default function Products() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label style={{ color: "#706233" }} className="block text-sm font-medium mb-2">
+                    Цена <span style={{ color: "#c62828" }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    placeholder="Введите цену товара"
+                    className="w-full px-4 py-3 rounded-xl outline-none"
+                    style={{
+                      backgroundColor: "#E1C78F",
+                      color: "#706233",
+                      border: "1px solid transparent"
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = "#B0926A")}
+                    onBlur={(e) => (e.target.style.borderColor = "transparent")}
+                  />
                 </div>
 
                 <div>
@@ -745,6 +781,13 @@ export default function Products() {
                   <span className="inline-block px-3 py-1 rounded-lg text-sm" style={{ backgroundColor: "#E1C78F", color: "#706233" }}>
                     {viewingProduct.catalog?.name || getCatalogName(viewingProduct.catalog_id)}
                   </span>
+                </div>
+
+                <div className="mb-4">
+                  <h3 style={{ color: "#706233", fontWeight: "600" }} className="mb-2">Цена</h3>
+                  <p style={{ color: "#706233", fontSize: "1.2rem", fontWeight: "600" }}>
+                    {viewingProduct.price ? `${Number(viewingProduct.price).toFixed(2)} ₽` : "Цена не указана"}
+                  </p>
                 </div>
                 
                 <div className="mb-4">
