@@ -13,6 +13,7 @@ import { Route as ProductsRouteImport } from './routes/products'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DocumentsRouteImport } from './routes/documents'
+import { Route as ChatBotRouteImport } from './routes/chat-bot'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AchievementsRouteImport } from './routes/achievements'
@@ -37,6 +38,11 @@ const LoginRoute = LoginRouteImport.update({
 const DocumentsRoute = DocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatBotRoute = ChatBotRouteImport.update({
+  id: '/chat-bot',
+  path: '/chat-bot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogRoute = CatalogRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
   '/catalog': typeof CatalogRoute
+  '/chat-bot': typeof ChatBotRoute
   '/documents': typeof DocumentsRoute
   '/login': typeof LoginRoute
   '/orders': typeof OrdersRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
   '/catalog': typeof CatalogRoute
+  '/chat-bot': typeof ChatBotRoute
   '/documents': typeof DocumentsRoute
   '/login': typeof LoginRoute
   '/orders': typeof OrdersRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
   '/catalog': typeof CatalogRoute
+  '/chat-bot': typeof ChatBotRoute
   '/documents': typeof DocumentsRoute
   '/login': typeof LoginRoute
   '/orders': typeof OrdersRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/admin'
     | '/catalog'
+    | '/chat-bot'
     | '/documents'
     | '/login'
     | '/orders'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/admin'
     | '/catalog'
+    | '/chat-bot'
     | '/documents'
     | '/login'
     | '/orders'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/admin'
     | '/catalog'
+    | '/chat-bot'
     | '/documents'
     | '/login'
     | '/orders'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   AchievementsRoute: typeof AchievementsRoute
   AdminRoute: typeof AdminRoute
   CatalogRoute: typeof CatalogRoute
+  ChatBotRoute: typeof ChatBotRoute
   DocumentsRoute: typeof DocumentsRoute
   LoginRoute: typeof LoginRoute
   OrdersRoute: typeof OrdersRoute
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/documents'
       preLoaderRoute: typeof DocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat-bot': {
+      id: '/chat-bot'
+      path: '/chat-bot'
+      fullPath: '/chat-bot'
+      preLoaderRoute: typeof ChatBotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catalog': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   AchievementsRoute: AchievementsRoute,
   AdminRoute: AdminRoute,
   CatalogRoute: CatalogRoute,
+  ChatBotRoute: ChatBotRoute,
   DocumentsRoute: DocumentsRoute,
   LoginRoute: LoginRoute,
   OrdersRoute: OrdersRoute,

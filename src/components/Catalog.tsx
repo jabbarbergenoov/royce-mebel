@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { FurnitureCard } from "./Cards/FurnitureCard";
 import { Drawer } from "./Drawer";
 import axios from "axios";
+import { useNavigate } from "@tanstack/react-router";
 
 interface Product {
   id: number;
@@ -19,6 +20,7 @@ interface Product {
 }
 
 export function Catalog() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -29,7 +31,17 @@ export function Catalog() {
   const [total, setTotal] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  // Состояния для заказа
+  const [isOrdering, setIsOrdering] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
+
   const baseURL = import.meta.env.VITE_API_URL;
+
+  // Проверка токена
+  const checkAccessToken = (): boolean => {
+    const token = localStorage.getItem('accessToken');
+    return !!token && token.length > 0;
+  };
 
   // Загрузка товаров
   const fetchProducts = async (isLoadMore = false) => {
@@ -75,11 +87,76 @@ export function Catalog() {
   const handleOpenDrawer = (product: Product) => {
     setSelectedProduct(product);
     setIsDrawerOpen(true);
+    setOrderError(null);
   };
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
     setSelectedProduct(null);
+    setOrderError(null);
+    setIsOrdering(false);
+  };
+
+  // Функция для оформления заказа
+  const handleOrder = async (orderData: {
+    full_name: string;
+    phone: string;
+    description?: string;
+    product_id: number;
+  }) => {
+    // Проверяем токен перед заказом
+    if (!checkAccessToken()) {
+      // Токен отсутствует - редирект на страницу логина
+      handleCloseDrawer();
+      navigate({ to: '/login' });
+      return;
+    }
+
+    setIsOrdering(true);
+    setOrderError(null);
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      
+      const response = await axios.post(
+        `${baseURL}/orders`,
+        orderData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      // Заказ успешно создан
+      console.log('Заказ создан:', response.data);
+      
+      // Показываем сообщение об успехе
+      setIsOrdering(false);
+      
+      // Закрываем Drawer через 2 секунды
+      setTimeout(() => {
+        handleCloseDrawer();
+      }, 2000);
+      
+      return response.data;
+      
+    } catch (error: any) {
+      console.error('Ошибка при создании заказа:', error);
+      
+      if (error.response?.status === 401) {
+        // Токен недействительный - удаляем и редиректим на логин
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        handleCloseDrawer();
+        navigate({ to: '/login' });
+        return;
+      }
+      
+      setOrderError(error.response?.data?.message || 'Произошла ошибка при создании заказа. Попробуйте позже.');
+      setIsOrdering(false);
+    }
   };
 
   const getImageUrl = (imagePath: string) => {
@@ -234,6 +311,9 @@ export function Catalog() {
               }
             : null
         }
+        onOrder={handleOrder}
+        isOrdering={isOrdering}
+        orderError={orderError}
       />
     </>
   );

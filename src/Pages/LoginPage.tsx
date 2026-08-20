@@ -1,72 +1,206 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Eye,
-  EyeOff,
   Lock,
-  Mail,
+  Phone,
   ArrowRight,
   AlertCircle,
   CheckCircle,
   X,
+  Send,
+  RefreshCw,
+  MessageCircle,
 } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "@tanstack/react-router";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    login: "",
-    password: "",
+    phone: "",
+    otp: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [error, setError] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [isResendDisabled, setIsResendDisabled] = useState(false);
   const navigate = useNavigate();
+  const timerInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+  // Таймер для повторной отправки кода
+  useEffect(() => {
+    if (timer > 0) {
+      timerInterval.current = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setIsResendDisabled(false);
+      if (timerInterval.current) {
+        clearInterval(timerInterval.current);
+      }
+    }
+    return () => {
+      if (timerInterval.current) {
+        clearInterval(timerInterval.current);
+      }
+    };
+  }, [timer]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "phone") {
+      // Удаляем все не цифры, но сохраняем +
+      const cleanValue = value.replace(/[^0-9+]/g, "");
+      // Если есть +, оставляем его только в начале
+      let formattedValue = cleanValue;
+      if (formattedValue.startsWith('+')) {
+        formattedValue = '+' + formattedValue.replace(/\+/g, '');
+      } else {
+        formattedValue = formattedValue.replace(/\+/g, '');
+      }
+      setFormData((prev) => ({ ...prev, [name]: formattedValue }));
+    } else if (name === "otp") {
+      const cleanValue = value.replace(/\D/g, "");
+      setFormData((prev) => ({ ...prev, [name]: cleanValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
     setError("");
   };
 
+  // Функция для форматирования телефона с +
+  const formatPhoneWithPlus = (phone: string): string => {
+    if (!phone) return "";
+    // Если уже есть +, возвращаем как есть
+    if (phone.startsWith('+')) return phone;
+    // Если номер начинается с 998, добавляем +
+    if (phone.startsWith('998')) return `+${phone}`;
+    // Иначе просто добавляем +
+    return `+${phone}`;
+  };
+
+  // Отправка OTP на номер телефона
+  const handleSendOtp = async () => {
+    // Удаляем все не цифры для валидации
+    const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+    const phoneRegex = /^[0-9]{9,13}$/;
+    
+    if (!cleanPhone) {
+      setError("Телефон номерингизни киритинг");
+      return;
+    }
+    if (!phoneRegex.test(cleanPhone)) {
+      setError("Телефон номерини тўғри киритинг (масалан: 998901234567)");
+      return;
+    }
+
+    setIsSendingOtp(true);
+    setError("");
+
+    // Форматируем телефон с +
+    const phoneWithPlus = formatPhoneWithPlus(cleanPhone);
+    console.log("📱 Отправка OTP на номер:", phoneWithPlus);
+
+    try {
+      await axios.post(
+        `${API_URL}/auth/send-otp`,
+        {
+          phone: phoneWithPlus,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      setTimer(60);
+      setIsResendDisabled(true);
+      setError("");
+      
+    } catch (error: any) {
+      console.error("❌ Ошибка отправки OTP:", error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.detail || "Код юборишда хатолик юз берди";
+      setError(errorMessage);
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  // Вход с OTP кодом
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Удаляем все не цифры для валидации
+    const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+    const phoneRegex = /^[0-9]{9,13}$/;
+    
+    if (!cleanPhone) {
+      setError("Телефон номерингизни киритинг");
+      return;
+    }
+    if (!phoneRegex.test(cleanPhone)) {
+      setError("Телефон номерини тўғри киритинг");
+      return;
+    }
+
+    if (!formData.otp.trim()) {
+      setError("Кодни киритинг");
+      return;
+    }
+    if (formData.otp.trim().length < 4) {
+      setError("Код 4 ёки 6 рақамдан иборат бўлиши керак");
+      return;
+    }
 
     setIsLoading(true);
     setError("");
 
-    const payload = {
-      login: formData.login,
-      password: formData.password,
-    };
-
-    if (!payload.login || !payload.password) {
-      setError("Заполните все поля");
-      setIsLoading(false);
-      return;
-    }
+    // Форматируем телефон с +
+    const phoneWithPlus = formatPhoneWithPlus(cleanPhone);
+    console.log("🔑 Вход с номером:", phoneWithPlus, "и кодом:", formData.otp);
 
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/login`,
-        payload,
+        `${API_URL}/auth/login`,
+        {
+          phone: phoneWithPlus,
+          otp: formData.otp.trim(),
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
 
-      console.log("Успешный вход:", data);
+      console.log("✅ Успешный вход:", data);
       localStorage.setItem("accessToken", data.access_token);
       localStorage.setItem("refreshToken", data.refres_token);
-      localStorage.setItem("role", data.role);
+      localStorage.setItem("userRole", data.role || "user");
 
-      // ДИСПАТЧИМ СОБЫТИЕ ДЛЯ ОБНОВЛЕНИЯ HEADER
+      const userData = {
+        phone: phoneWithPlus,
+        role: data.role || "user"
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
+
       window.dispatchEvent(new Event("authChange"));
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'accessToken',
+        newValue: data.access_token,
+      }));
 
       setShowSuccess(true);
       setTimeout(() => {
         navigate({ to: "/catalog" });
       }, 1500);
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Неверный логин или пароль";
+      console.error("❌ Ошибка входа:", error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.detail || "Код нотўғри ёки эскирган";
       setError(errorMessage);
 
       const formElement = document.querySelector("form");
@@ -81,34 +215,69 @@ export default function LoginPage() {
     }
   };
 
+  // Повторная отправка OTP
+  const handleResendOtp = async () => {
+    if (isResendDisabled) return;
+    
+    const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+    if (!cleanPhone) {
+      setError("Телефон номерингизни киритинг");
+      return;
+    }
+    
+    setIsSendingOtp(true);
+    setError("");
+    
+    const phoneWithPlus = formatPhoneWithPlus(cleanPhone);
+    
+    try {
+      await axios.post(
+        `${API_URL}/auth/send-otp`,
+        {
+          phone: phoneWithPlus,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      
+      setTimer(60);
+      setIsResendDisabled(true);
+      setError("");
+      
+    } catch (error: any) {
+      console.error("❌ Ошибка повторной отправки OTP:", error);
+      setError(error.response?.data?.message || error.response?.data?.detail || "Код қайта юборишда хатолик");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  // Переход на страницу регистрации
+  const goToRegister = () => {
+    navigate({ to: '/register' });
+  };
+
+  // Открыть Telegram бота
+  const openTelegramBot = () => {
+    window.open('https://t.me/medicine_reminderx_bot', '_blank');
+  };
+
   return (
     <div
       style={{ backgroundColor: "#FAE7C9" }}
       className="min-h-screen relative"
     >
-      {/* Анимация встряхивания */}
       <style
         //@ts-ignore
         jsx
       >{`
         @keyframes shake {
-          0%,
-          100% {
-            transform: translateX(0);
-          }
-          10%,
-          30%,
-          50%,
-          70%,
-          90% {
-            transform: translateX(-5px);
-          }
-          20%,
-          40%,
-          60%,
-          80% {
-            transform: translateX(5px);
-          }
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
       `}</style>
 
@@ -135,7 +304,7 @@ export default function LoginPage() {
         )}
       </AnimatePresence>
 
-      {/* Hero секция с градиентом */}
+      {/* Hero секция */}
       <section
         className="relative overflow-hidden py-20 px-6"
         style={{ backgroundColor: "#E1C78F" }}
@@ -180,7 +349,7 @@ export default function LoginPage() {
                 marginBottom: "1rem",
               }}
             >
-              Добро пожаловать назад
+              Добро пожаловать
             </h1>
             <p
               style={{
@@ -190,7 +359,7 @@ export default function LoginPage() {
                 opacity: 0.9,
               }}
             >
-              Войдите в свой аккаунт, чтобы продолжить
+              Телефон рақамингизга код юборамиз
             </p>
           </motion.div>
         </div>
@@ -207,35 +376,35 @@ export default function LoginPage() {
             style={{ backgroundColor: "#E1C78F" }}
           >
             <form onSubmit={handleSubmit}>
-              <div className="mb-6">
+              {/* Телефон номер */}
+              <div className="mb-4">
                 <label
-                  htmlFor="login"
+                  htmlFor="phone"
                   style={{ color: "#706233" }}
                   className="block text-sm font-semibold mb-2"
                 >
-                  Логин или Email
+                  Телефон рақам
                 </label>
                 <div className="relative group">
-                  <Mail
+                  <Phone
                     size={20}
                     style={{ color: "#706233" }}
                     className="absolute left-3 top-1/2 -translate-y-1/2 opacity-60 group-focus-within:opacity-100 transition-opacity"
                   />
                   <input
-                    type="text"
-                    id="login"
-                    name="login"
-                    value={formData.login}
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
                     onChange={handleChange}
-                    placeholder="Введите ваш логин"
+                    placeholder="+998901234567"
                     className="w-full pl-10 pr-4 py-3 rounded-xl outline-none transition-all duration-200"
                     style={{
                       backgroundColor: "#FAE7C9",
                       color: "#706233",
-                      border:
-                        error && !formData.login
-                          ? "2px solid #c62828"
-                          : "2px solid transparent",
+                      border: error && !formData.phone
+                        ? "2px solid #c62828"
+                        : "2px solid transparent",
                     }}
                     onFocus={(e) => {
                       e.target.style.borderColor = "#B0926A";
@@ -247,13 +416,28 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {/* OTP код */}
               <div className="mb-4">
                 <label
-                  htmlFor="password"
+                  htmlFor="otp"
                   style={{ color: "#706233" }}
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-sm font-semibold mb-2 flex items-center justify-between"
                 >
-                  Пароль
+                  <span>Код</span>
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={isResendDisabled || isSendingOtp || !formData.phone}
+                    className="flex items-center gap-1 text-xs font-medium hover:underline transition-all"
+                    style={{ 
+                      color: isResendDisabled || !formData.phone ? "#706233" : "#706233",
+                      opacity: isResendDisabled || !formData.phone ? 0.4 : 0.8,
+                      cursor: isResendDisabled || !formData.phone ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    <Send size={14} />
+                    {isResendDisabled ? `${timer}с` : isSendingOtp ? "Юбориляпти..." : "Код олиш"}
+                  </button>
                 </label>
                 <div className="relative group">
                   <Lock
@@ -262,20 +446,20 @@ export default function LoginPage() {
                     className="absolute left-3 top-1/2 -translate-y-1/2 opacity-60 group-focus-within:opacity-100 transition-opacity"
                   />
                   <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    name="password"
-                    value={formData.password}
+                    type="text"
+                    id="otp"
+                    name="otp"
+                    value={formData.otp}
                     onChange={handleChange}
-                    placeholder="Введите ваш пароль"
-                    className="w-full pl-10 pr-12 py-3 rounded-xl outline-none transition-all duration-200"
+                    placeholder="Кодни киритинг"
+                    maxLength={6}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl outline-none transition-all duration-200 text-center tracking-[0.3rem] text-lg"
                     style={{
                       backgroundColor: "#FAE7C9",
                       color: "#706233",
-                      border:
-                        error && !formData.password
-                          ? "2px solid #c62828"
-                          : "2px solid transparent",
+                      border: error && !formData.otp
+                        ? "2px solid #c62828"
+                        : "2px solid transparent",
                     }}
                     onFocus={(e) => {
                       e.target.style.borderColor = "#B0926A";
@@ -284,21 +468,36 @@ export default function LoginPage() {
                       if (!error) e.target.style.borderColor = "transparent";
                     }}
                   />
+                </div>
+                <div className="mt-2 flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-70 transition-opacity"
+                    onClick={openTelegramBot}
+                    className="flex items-center gap-1 text-xs hover:underline transition-all"
+                    style={{ color: "#706233", opacity: 0.6 }}
                   >
-                    {showPassword ? (
-                      <EyeOff size={20} style={{ color: "#706233" }} />
-                    ) : (
-                      <Eye size={20} style={{ color: "#706233" }} />
-                    )}
+                    <MessageCircle size={14} />
+                    @medicine_reminderx_bot
+                  </button>
+                  <span style={{ color: "#706233", opacity: 0.3 }}>|</span>
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={isResendDisabled || isSendingOtp}
+                    className="flex items-center gap-1 text-xs hover:underline transition-all"
+                    style={{ 
+                      color: isResendDisabled ? "#706233" : "#706233",
+                      opacity: isResendDisabled ? 0.3 : 0.6,
+                      cursor: isResendDisabled ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    <RefreshCw size={12} className={isSendingOtp ? "animate-spin" : ""} />
+                    {isResendDisabled ? `Қайта юбориш (${timer}с)` : "Қайта юбориш"}
                   </button>
                 </div>
               </div>
 
-              {/* Ошибка с иконкой */}
+              {/* Ошибка */}
               <AnimatePresence>
                 {error && (
                   <motion.div
@@ -319,36 +518,49 @@ export default function LoginPage() {
                 )}
               </AnimatePresence>
 
+              {/* Кнопка входа */}
               <motion.button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isSendingOtp}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 relative overflow-hidden group"
                 style={{
                   backgroundColor: "#706233",
                   color: "#FAE7C9",
-                  opacity: isLoading ? 0.7 : 1,
-                  cursor: isLoading ? "not-allowed" : "pointer",
+                  opacity: (isLoading || isSendingOtp) ? 0.7 : 1,
+                  cursor: (isLoading || isSendingOtp) ? "not-allowed" : "pointer",
                 }}
               >
                 <span className="relative z-10 flex items-center gap-2">
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 rounded-full animate-spin border-2 border-white border-t-transparent" />
-                      Вход...
+                      Текшириляпти...
                     </>
                   ) : (
                     <>
-                      Войти
-                      <ArrowRight
-                        size={18}
-                        className="group-hover:translate-x-1 transition-transform"
-                      />
+                      Кириш
+                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
                 </span>
               </motion.button>
+
+              {/* Переход на регистрацию */}
+              <div className="mt-4 text-center">
+                <p className="text-sm" style={{ color: "#706233", opacity: 0.7 }}>
+                  Аккаунтингиз йўқми?
+                </p>
+                <button
+                  type="button"
+                  onClick={goToRegister}
+                  className="mt-1 text-sm font-semibold hover:underline transition-all"
+                  style={{ color: "#706233" }}
+                >
+                  Рўйхатдан ўтиш →
+                </button>
+              </div>
             </form>
           </motion.div>
 
